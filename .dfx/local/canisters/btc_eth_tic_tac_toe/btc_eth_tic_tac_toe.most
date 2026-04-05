@@ -1,0 +1,8 @@
+// Version: 1.0.0
+actor {
+  stable var board : [var Nat];
+  stable var currentPlayer : Nat;
+  stable var gameOver : Bool;
+  stable var moveCount : Nat;
+  stable var winner : Nat
+};

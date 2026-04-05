@@ -1,0 +1,32 @@
+type HttpResponse = 
+ record {
+   body: blob;
+   headers: vec record {
+                  name: text;
+                  value: text;
+                };
+   status_code: nat;
+   streaming_strategy: opt text;
+ };
+type HttpRequest = 
+ record {
+   body: blob;
+   headers: vec record {
+                  name: text;
+                  value: text;
+                };
+   method: text;
+   url: text;
+ };
+service : {
+  getBoard: () -> (vec nat) query;
+  getCurrentPlayer: () -> (nat) query;
+  getWinner: () -> (nat) query;
+  http_request: (req: HttpRequest) -> (HttpResponse) query;
+  isGameOver: () -> (bool) query;
+  makeMove: (position: nat) -> (variant {
+                                  err: text;
+                                  ok: bool;
+                                });
+  reset: () -> ();
+}
