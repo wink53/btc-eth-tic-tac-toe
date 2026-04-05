@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "canisters": {
+    "btc_eth_tic_tac_toe": {
+      "main": "src/btc_eth_tic_tac_toe/main.mo",
+      "type": "motoko"
+    }
+  }
+}
