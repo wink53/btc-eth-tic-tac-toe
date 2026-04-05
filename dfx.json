@@ -2,6 +2,7 @@
   "version": 1,
   "canisters": {
     "btc_eth_tic_tac_toe": {
+      "type": "motoko",
       "main": "src/btc_eth_tic_tac_toe/main.mo"
     }
   }
