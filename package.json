@@ -4,8 +4,10 @@
   "description": "Tic-Tac-Toe game on ICP with Bitcoin vs Ethereum logos",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server",
-    "deploy": "dfx deploy"
+    "build:icp": "webpack --config webpack.config.js --env icp",
+    "deploy": "dfx deploy",
+    "deploy:icp": "dfx deploy --network ic",
+    "generate": "dfx generate"
   },
   "dependencies": {
     "@dfinity/agent": "^0.21.0",

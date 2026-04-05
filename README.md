@@ -2,7 +2,10 @@
 
 A Tic-Tac-Toe game running on the Internet Computer where Bitcoin battles Ethereum!
 
-![BTC vs ETH](https://img.shields.io/badge/BTC-ETH-Tic%20Tac%20Toe-f7931a?logo=bitcoin&logoColor=627eea)
+## Architecture
+
+- **Backend Canister**: `btc_eth_tic_tac_toe` - Motoko smart contract handling game logic
+- **Frontend Canister**: `btc_eth_tic_tac_toe_assets` - Asset canister serving HTML/CSS/JS
 
 ## Game Rules
 
@@ -11,65 +14,70 @@ A Tic-Tac-Toe game running on the Internet Computer where Bitcoin battles Ethere
 - Click any empty cell to place your logo
 - First to get 3 in a row (horizontal, vertical, or diagonal) wins!
 
-## Setup & Deployment
+## Quick Deploy (Local)
 
 ### Prerequisites
 
-- Install DFX (Internet Computer SDK):
+Install DFX (Internet Computer SDK):
 
 ```bash
 # macOS/Linux
 curl -fsSL https://internetcomputer.org/install.sh | sh
 
-# Or via npm
-npm install -g dfx
+# Verify installation
+dfx --version
 ```
 
-### Deploy Locally
+### Deploy
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/wink53/btc-eth-tic-tac-toe.git
-   cd btc-eth-tic-tac-toe
-   ```
+```bash
+# Clone the repo
+git clone https://github.com/wink53/btc-eth-tic-tac-toe.git
+cd btc-eth-tic-tac-toe
 
-2. **Start the local ICP replica**
-   ```bash
-   dfx start --background
-   ```
+# Start local ICP replica
+dfx start --background
 
-3. **Deploy the canister**
-   ```bash
-   dfx deploy
-   ```
+# Deploy to local replica
+dfx deploy
 
-4. **Build the frontend**
-   ```bash
-   npm install
-   npm run build
-   ```
+# Build frontend
+npm install
+npm run build
+```
 
-5. **Open in browser**
-   Navigate to the canister URL shown after deployment (typically `http://localhost:8000/?canisterId=...`)
+Open the URL shown in the output (typically `http://localhost:8000/?canisterId=...`)
 
-### Deploy to ICP Mainnet
+## Deploy to ICP Mainnet
 
 ```bash
 dfx deploy --network ic
 ```
 
+## ICP Ninja (Browser IDE)
+
+You can also deploy using ICP Ninja:
+
+1. Go to https://icp.ninja
+2. Create a new Motoko project
+3. Copy the contents of `src/btc_eth_tic_tac_toe/main.mo` into the editor
+4. Deploy the canister
+5. Create a new asset canister and upload the built `dist/` files
+
 ## Project Structure
 
 ```
 btc-eth-tic-tac-toe/
-├── dfx.json                              # DFX configuration
-├── package.json                          # npm dependencies
-├── webpack.config.js                     # Webpack config for frontend
+├── dfx.json                              # Canister configuration
+├── package.json                           # npm dependencies
+├── webpack.config.js                      # Webpack config
 ├── src/
-│   └── btc_eth_tic_tac_toe/
-│       ├── main.mo                       # Motoko backend (game logic)
+│   ├── btc_eth_tic_tac_toe/             # Backend canister
+│   │   ├── main.mo                       # Motoko game logic
+│   │   └── main.did                      # Candid interface
+│   └── btc_eth_tic_tac_toe_assets/       # Frontend canister
 │       ├── index.html                    # Game UI
-│       └── index.js                      # Frontend JS + ICP connection
+│       └── index.js                      # ICP connection
 └── README.md
 ```
 
@@ -79,6 +87,19 @@ btc-eth-tic-tac-toe/
 - **Frontend**: Vanilla JS, HTML, CSS
 - **Build**: Webpack
 - **Blockchain**: Internet Computer Protocol (ICP)
+
+## Canister Interface
+
+```candid
+service : {
+  "getBoard": () -> (vec nat8) query;
+  "getCurrentPlayer": () -> (nat8) query;
+  "isGameOver": () -> (bool) query;
+  "getWinner": () -> (nat8) query;
+  "makeMove": (position: nat8) -> (variant { ok: bool; err: text });
+  "reset": () -> ();
+}
+```
 
 ## License
 

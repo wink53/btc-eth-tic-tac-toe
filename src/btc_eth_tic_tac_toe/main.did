@@ -1,0 +1,8 @@
+service : {
+  "getBoard": () -> (vec nat8) query;
+  "getCurrentPlayer": () -> (nat8) query;
+  "isGameOver": () -> (bool) query;
+  "getWinner": () -> (nat8) query;
+  "makeMove": (position: nat8) -> (variant { ok: bool; err: text });
+  "reset": () -> ();
+}
