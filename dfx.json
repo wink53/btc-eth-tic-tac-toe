@@ -3,16 +3,6 @@
   "canisters": {
     "btc_eth_tic_tac_toe": {
       "main": "src/btc_eth_tic_tac_toe/main.mo"
-    },
-    "btc_eth_tic_tac_toe_assets": {
-      "source": ["dist/"],
-      "type": "assets",
-      "dependencies": ["btc_eth_tic_tac_toe"]
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": ""
     }
   }
 }
