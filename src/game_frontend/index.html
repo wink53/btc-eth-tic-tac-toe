@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BTC vs ETH Tic Tac Toe</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+    h1{font-size:2.5rem;background:linear-gradient(90deg,#f7931a,#627eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{margin-bottom:1.5rem;opacity:.8}
+    .players{display:flex;gap:2rem;margin-bottom:1rem}
+    .player{padding:.5rem 1rem;border-radius:8px;font-weight:bold;opacity:.5;transition:all .3s}
+    .player.active{opacity:1;transform:scale(1.1);box-shadow:0 0 20px rgba(255,255,255,.2)}
+    .player.bitcoin{background:rgba(247,147,26,.2);border:2px solid #f7931a}
+    .player.bitcoin.active{background:rgba(247,147,26,.4)}
+    .player.ethereum{background:rgba(98,126,234,.2);border:2px solid #627eea}
+    .player.ethereum.active{background:rgba(98,126,234,.4)}
+    .board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:rgba(255,255,255,.1);padding:8px;border-radius:12px}
+    .cell{width:100px;height:100px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+    .cell:hover{background:rgba(255,255,255,.1);transform:scale(1.05)}
+    .cell.taken{cursor:not-allowed}
+    .cell.taken:hover{transform:none}
+    .cell img{width:60px;height:60px}
+    .status{margin-top:1.5rem;font-size:1.3rem}
+    .status.win{color:#4ade80;font-weight:bold}
+    .status.draw{color:#fbbf24;font-weight:bold}
+    .reset-btn{margin-top:1rem;padding:.75rem 2rem;font-size:1rem;background:linear-gradient(135deg,#f7931a,#627eea);border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:bold;transition:transform .2s}
+    .reset-btn:hover{transform:translateY(-2px)}
+    #loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:100}
+  </style>
+</head>
+<body>
+  <div id="loading">Loading ICP Agent...</div>
+  <h1>BTC vs ETH</h1>
+  <p class="subtitle">Tic Tac Toe on ICP</p>
+  <div class="players">
+    <div class="player bitcoin" id="pb"><span>Bitcoin</span></div>
+    <div class="player ethereum" id="pe"><span>Ethereum</span></div>
+  </div>
+  <div class="board" id="board">
+    <div class="cell" data-i="0"></div>
+    <div class="cell" data-i="1"></div>
+    <div class="cell" data-i="2"></div>
+    <div class="cell" data-i="3"></div>
+    <div class="cell" data-i="4"></div>
+    <div class="cell" data-i="5"></div>
+    <div class="cell" data-i="6"></div>
+    <div class="cell" data-i="7"></div>
+    <div class="cell" data-i="8"></div>
+  </div>
+  <p class="status" id="status">Click to play</p>
+  <button class="reset-btn" id="reset">New Game</button>
+</body>
+</html>

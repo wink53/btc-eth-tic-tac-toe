@@ -1,9 +1,13 @@
 {
   "version": 1,
   "canisters": {
-    "btc_eth_tic_tac_toe": {
+    "game_backend": {
       "type": "motoko",
-      "main": "src/btc_eth_tic_tac_toe/main.mo"
+      "main": "src/game_backend/main.mo"
+    },
+    "game_frontend": {
+      "type": "assets",
+      "source": ["src/game_frontend/assets"]
     }
   }
 }
