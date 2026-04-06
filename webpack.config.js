@@ -7,11 +7,14 @@ module.exports = {
   mode: 'development',
   entry: './src/game_frontend/index.js',
   output: {
-    filename: 'bundle.js',
+    filename: 'bundle.[contenthash].js',
     path: path.resolve(__dirname, 'src/game_frontend/assets'),
   },
   resolve: {
     extensions: ['.js'],
+    alias: {
+      '@declarations': path.resolve(__dirname, 'src/declarations'),
+    },
     fallback: {
       process: require.resolve('process/browser'),
     },
@@ -22,8 +25,8 @@ module.exports = {
       filename: 'index.html',
     }),
     new webpack.DefinePlugin({
+      'process.env.CANISTER_ID_GAME_BACKEND': JSON.stringify('bkyz2-fmaaa-aaaaa-qaaaq-cai'),
       'process.env.DFX_NETWORK': JSON.stringify('local'),
-      'process.env.CANISTER_ID_GAME_BACKEND': JSON.stringify('xjaw7-xp777-77774-qaajq-cai'),
     }),
   ],
 };

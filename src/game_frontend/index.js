@@ -1,156 +1,173 @@
-import { Actor, HttpAgent } from '@icp-sdk/core/agent';
-import { idlFactory } from '../declarations/game_backend/game_backend.did.js';
-import { canisterId } from '../declarations/game_backend/index.js';
+// BTC vs ETH Tic Tac Toe - using @dfinity/agent with generated declarations
+import { HttpAgent } from '@dfinity/agent';
+import { canisterId, createActor } from '@declarations/game_backend';
 
-// BTC and ETH SVG icons
-const B = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23f7931a%22/%3E%3Cpath fill=%22%23fff%22 d=%22M23.2 14.1c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.7-.4-.7 2.6c-.4-.1-.9-.2-1.4-.3l.7-2.6-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2l-2.2-.6-.4 1.7s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 0 .1 0 .2.1h-.2l-1.1 4.5c-.1.2-.3.5-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.7.4.7-2.7c.5.1.9.2 1.4.3l-.7 2.7 1.7.4.7-2.8c3 .6 5.2.3 6.2-2.4.8-2.2 0-3.4-1.6-4.2 1.1-.3 2-1 2.2-2.5zm-4 5.5c-.5 2.2-4.2 1-5.4.7l1-3.9c1.2.3 5 .9 4.4 3.2zm.6-5.6c-.5 1.9-3.5.9-4.5.7l.9-3.5c1 .2 4.1.7 3.6 2.8z%22/%3E%3C/svg%3E';
-const E = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22%23627eea%22/%3E%3Cpath fill=%22%23fff%22 d=%22M16 4v8.9l7.5 3.3L16 4z%22/%3E%3Cpath fill=%22%23c0cbf2%22 d=%22M16 4L8.5 16.2l7.5-3.3V4z%22/%3E%3Cpath fill=%22%23fff%22 d=%22M16 22v6l7.5-10.4L16 22z%22/%3E%3Cpath fill=%22%23c0cbf2%22 d=%22M16 28v-6L8.5 17.6l7.5 10.4z%22/%3E%3Cpath fill=%22%23fff%22 d=%22M16 20.4l7.5-4.2L16 12.9v7.5z%22/%3E%3Cpath fill=%22%23c0cbf2%22 d=%22M8.5 16.2l7.5 4.2v-7.5L8.5 16.2z%22/%3E%3C/svg%3E';
+const REPLICA_URL = 'http://127.0.0.1:4943';
 
-// Win patterns
-const WP = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-
-// Create agent and actor
+// Create agent and actor using generated declarations
 const agent = new HttpAgent({
-  host: 'http://127.0.0.1:4943',
-});
+  host: REPLICA_URL,
+  verifyQuerySignatures: false,
+}, 'local');
 
-// Fetch root key for local development
-if (process.env.DFX_NETWORK !== 'ic') {
-  agent.fetchRootKey().catch(err => {
-    console.warn('Unable to fetch root key:', err);
-  });
-}
-
-const backend = Actor.createActor(idlFactory, {
+const actor = createActor(canisterId, {
   agent,
-  canisterId,
 });
 
-// Game state
-let cp = 1;
-let go = false;
-let br = [0,0,0,0,0,0,0,0,0];
+// Icons as inline SVGs
+const BTC_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="45" fill="#f7931a"/><text x="50" y="65" font-family="Arial" font-size="40" font-weight="bold" fill="white" text-anchor="middle">₿</text></svg>`;
+const ETH_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="45" fill="#627eea"/><text x="50" y="65" font-family="Arial" font-size="40" font-weight="bold" fill="white" text-anchor="middle">Ξ</text></svg>`;
+const PLAYERS = { 1: { name: 'Bitcoin', svg: BTC_SVG }, 2: { name: 'Ethereum', svg: ETH_SVG } };
 
 // DOM elements
-const cs = document.querySelectorAll('.cell');
-const st = document.getElementById('status');
-const pb = document.getElementById('pb');
-const pe = document.getElementById('pe');
-const loading = document.getElementById('loading');
+const cells = document.querySelectorAll('.cell');
+const statusEl = document.getElementById('status');
+const pbEl = document.getElementById('pb');
+const peEl = document.getElementById('pe');
+const resetBtn = document.getElementById('reset');
+const loadingEl = document.getElementById('loading');
+const overlayEl = document.getElementById('overlay');
+const bannerEl = document.getElementById('banner');
+const bannerTitle = document.getElementById('bannerTitle');
+const bannerSubtitle = document.getElementById('bannerSubtitle');
+const playAgainBtn = document.getElementById('playAgain');
 
-// UI functions
-function ui() {
-  pb.classList.toggle('active', cp === 1 && !go);
-  pe.classList.toggle('active', cp === 2 && !go);
+// Game state
+let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+let currentPlayer = 1;
+let gameOver = false;
+let winner = 0;
+
+function hideBanner() {
+  overlayEl.style.display = 'none';
+  bannerEl.style.display = 'none';
+  bannerEl.className = 'banner';
 }
 
-function rd() {
-  cs.forEach((c, i) => {
-    if (br[i] === 1) {
-      c.innerHTML = `<img src="${B}">`;
-      c.classList.add('taken');
-    } else if (br[i] === 2) {
-      c.innerHTML = `<img src="${E}">`;
-      c.classList.add('taken');
+function showBanner(winner, pattern) {
+  overlayEl.style.display = 'block';
+  bannerEl.style.display = 'block';
+
+  if (winner === 3) {
+    bannerEl.classList.add('draw');
+    bannerTitle.textContent = "It's a Draw!";
+    bannerSubtitle.textContent = 'Great game, both players!';
+  } else {
+    const player = PLAYERS[winner];
+    bannerEl.classList.add(player.name.toLowerCase());
+    bannerTitle.textContent = `${player.name} Wins!`;
+    bannerSubtitle.textContent = 'Congratulations to the winner!';
+  }
+}
+
+async function render() {
+  pbEl.classList.toggle('active', currentPlayer === 1 && !gameOver);
+  peEl.classList.toggle('active', currentPlayer === 2 && !gameOver);
+
+  cells.forEach((cell, i) => {
+    if (board[i] !== 0 && PLAYERS[board[i]]) {
+      cell.innerHTML = ''; // clear
+      cell.classList.add('taken');
+      // Use setTimeout to defer SVG insertion, forcing fresh animation
+      setTimeout(() => {
+        cell.innerHTML = PLAYERS[board[i]].svg;
+      }, 0);
     } else {
-      c.innerHTML = '';
-      c.classList.remove('taken');
+      cell.innerHTML = '';
+      cell.classList.remove('taken');
     }
   });
-}
 
-function updateStatus(msg, className) {
-  st.textContent = msg;
-  st.className = 'status' + (className ? ' ' + className : '');
-}
-
-// Sync game state from backend
-async function syncState() {
-  try {
-    const [board, player, gameOver, winner] = await Promise.all([
-      backend.getBoard(),
-      backend.getCurrentPlayer(),
-      backend.isGameOver(),
-      backend.getWinner()
-    ]);
-    br = Array.from(board).map(n => Number(n));
-    cp = Number(player);
-    go = gameOver;
-    rd();
-    ui();
-    if (go) {
-      const w = Number(winner);
-      updateStatus(w === 1 ? 'Bitcoin wins!' : w === 2 ? 'Ethereum wins!' : "It's a draw!", w < 3 ? 'win' : 'draw');
-    } else {
-      updateStatus(cp === 1 ? "Bitcoin's turn" : "Ethereum's turn");
+  if (gameOver) {
+    if (winner === 3) {
+      statusEl.textContent = "It's a draw!";
+      statusEl.className = 'status draw';
+      hideBanner();
+    } else if (PLAYERS[winner]) {
+      statusEl.textContent = `${PLAYERS[winner].name} wins!`;
+      statusEl.className = 'status win';
+      // Fetch winning pattern and highlight
+      try {
+        const pattern = await actor.getWinningPattern();
+        if (pattern && pattern.length === 3) {
+          pattern.forEach(i => cells[i].classList.add('winner'));
+        }
+        showBanner(winner, pattern);
+      } catch (e) {
+        console.error('Pattern fetch error:', e);
+      }
     }
-  } catch (e) {
-    console.error('Sync failed:', e);
-    updateStatus('Sync failed: ' + e.message);
-  }
-}
-
-// Click handler
-async function cl(i) {
-  if (go || br[i] !== 0) return;
-
-  try {
-    const result = await backend.makeMove(i);
-    if (result.ok) {
-      br[i] = cp;
-    }
-  } catch (e) {
-    console.error('Move failed:', e);
-    return;
-  }
-
-  // Check for win locally
-  let w = 0;
-  for (const p of WP) {
-    if (br[p[0]] !== 0 && br[p[0]] === br[p[1]] && br[p[1]] === br[p[2]]) {
-      w = br[p[0]];
-      go = true;
-      break;
-    }
-  }
-
-  if (!go && br.every(c => c !== 0)) {
-    w = 3;
-    go = true;
-  }
-
-  rd();
-  ui();
-
-  if (go) {
-    updateStatus(w === 1 ? 'Bitcoin wins!' : w === 2 ? 'Ethereum wins!' : "It's a draw!", w < 3 ? 'win' : 'draw');
   } else {
-    cp = cp === 1 ? 2 : 1;
-    ui();
-    updateStatus(cp === 1 ? "Bitcoin's turn" : "Ethereum's turn");
+    statusEl.textContent = `${PLAYERS[currentPlayer]?.name || 'Player'}'s turn`;
+    statusEl.className = 'status';
+    hideBanner();
+  }
+
+  loadingEl.style.display = 'none';
+}
+
+async function fetchState() {
+  try {
+    console.log('Fetching state...');
+
+    const [boardResult, playerResult, gameOverResult, winnerResult] = await Promise.all([
+      actor.getBoard(),
+      actor.getCurrentPlayer(),
+      actor.isGameOver(),
+      actor.getWinner(),
+    ]);
+
+    board = boardResult.map(n => Number(n));
+    currentPlayer = Number(playerResult) || 1;
+    gameOver = Boolean(gameOverResult);
+    winner = Number(winnerResult) || 0;
+    console.log('Board:', board, 'Player:', currentPlayer, 'GameOver:', gameOver, 'Winner:', winner);
+
+    render();
+  } catch (e) {
+    console.error('State fetch error:', e);
+    render();
+  }
+  loadingEl.style.display = 'none';
+}
+
+async function makeMove(pos) {
+  if (gameOver || board[pos] !== 0) return;
+
+  try {
+    console.log('Making move:', pos);
+    await actor.makeMove(pos);
+    setTimeout(fetchState, 300);
+  } catch (e) {
+    console.error('Move error:', e);
   }
 }
 
-// Reset handler
-async function rs() {
+async function resetGame() {
   try {
-    await backend.reset();
-    br = [0,0,0,0,0,0,0,0,0];
-    cp = 1;
-    go = false;
-    updateStatus('Click to play');
-    rd();
-    ui();
+    console.log('Resetting game...');
+    hideBanner();
+    await actor.reset();
+    board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    currentPlayer = 1;
+    gameOver = false;
+    winner = 0;
+    setTimeout(fetchState, 300);
   } catch (e) {
-    console.error('Reset failed:', e);
+    console.error('Reset error:', e);
   }
 }
 
 // Event listeners
-cs.forEach((c, i) => c.addEventListener('click', () => cl(i)));
-document.getElementById('reset').addEventListener('click', rs);
-
-// Initialize
-syncState().then(() => {
-  loading.style.display = 'none';
+cells.forEach((cell, i) => {
+  cell.addEventListener('click', () => makeMove(i));
 });
+resetBtn.addEventListener('click', resetGame);
+playAgainBtn.addEventListener('click', () => {
+  hideBanner();
+  resetGame();
+});
+
+// Init
+loadingEl.style.display = 'block';
+fetchState();

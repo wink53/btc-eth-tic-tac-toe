@@ -2,10 +2,11 @@ service : {
   getBoard: () -> (vec nat) query;
   getCurrentPlayer: () -> (nat) query;
   getWinner: () -> (nat) query;
+  getWinningPattern: () -> (vec nat) query;
   isGameOver: () -> (bool) query;
-  makeMove: (position: nat) -> (variant {
-                                  err: text;
-                                  ok: bool;
-                                });
+  makeMove: (nat) -> (variant {
+                        err: text;
+                        ok: bool;
+                      });
   reset: () -> ();
 }

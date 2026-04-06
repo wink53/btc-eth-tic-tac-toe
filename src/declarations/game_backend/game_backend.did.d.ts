@@ -1,11 +1,12 @@
-import type { Principal } from '@icp-sdk/core/principal';
-import type { ActorMethod } from '@icp-sdk/core/agent';
-import type { IDL } from '@icp-sdk/core/candid';
+import type { Principal } from '@dfinity/principal';
+import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
 
 export interface _SERVICE {
   'getBoard' : ActorMethod<[], Array<bigint>>,
   'getCurrentPlayer' : ActorMethod<[], bigint>,
   'getWinner' : ActorMethod<[], bigint>,
+  'getWinningPattern' : ActorMethod<[], Array<bigint>>,
   'isGameOver' : ActorMethod<[], boolean>,
   'makeMove' : ActorMethod<[bigint], { 'ok' : boolean } | { 'err' : string }>,
   'reset' : ActorMethod<[], undefined>,

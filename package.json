@@ -7,7 +7,7 @@
     "build": "webpack --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-"repository": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/wink53/btc-eth-tic-tac-toe.git"
   },
@@ -19,10 +19,15 @@
   },
   "homepage": "https://github.com/wink53/btc-eth-tic-tac-toe#readme",
   "dependencies": {
-    "@dfinity/agent": "^3.4.3",
+    "@dfinity/agent": "^0.18.1",
+    "@dfinity/auth-client": "^3.4.3",
+    "@dfinity/candid": "^3.4.3",
+    "@dfinity/identity-secp256k1": "^3.4.3",
+    "@dfinity/principal": "^3.4.3",
     "@icp-sdk/core": "^5.2.1",
     "copy-webpack-plugin": "^14.0.0",
     "html-webpack-plugin": "^5.6.6",
+    "ic0": "^0.3.2",
     "process": "^0.11.10",
     "webpack": "^5.105.4",
     "webpack-cli": "^7.0.2"

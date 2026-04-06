@@ -21,15 +21,31 @@
     .cell:hover{background:rgba(255,255,255,.1);transform:scale(1.05)}
     .cell.taken{cursor:not-allowed}
     .cell.taken:hover{transform:none}
-    .cell img{width:60px;height:60px}
+    .cell img{width:60px;height:60px;animation:placeMarker .3s ease-out}
+    @keyframes placeMarker{from{transform:scale(0) rotate(-180deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+    .cell.winner{animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.7)}50%{box-shadow:0 0 20px 10px rgba(74,222,128,.3)}}
+    .cell.winner::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,222,128,.3),transparent);border-radius:6px}
     .status{margin-top:1.5rem;font-size:1.3rem}
-    .status.win{color:#4ade80;font-weight:bold}
+    .status.win{color:#4ade80;font-weight:bold;animation:bounce 1s ease}
     .status.draw{color:#fbbf24;font-weight:bold}
+    @keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}50%{transform:translateY(-5px)}}
+    .banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,rgba(0,0,0,.95),rgba(30,30,50,.95));border:3px solid #4ade80;border-radius:20px;padding:2rem 3rem;text-align:center;z-index:200;animation:popIn .5s ease forwards}
+    @keyframes popIn{0%{transform:translate(-50%,-50%) scale(0);opacity:0}70%{transform:translate(-50%,-50%) scale(1.1);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+    .banner h2{font-size:2rem;margin-bottom:.5rem}
+    .banner.bitcoin h2{color:#f7931a}
+    .banner.ethereum h2{color:#627eea}
+    .banner.draw h2{color:#fbbf24}
+    .banner p{opacity:.8}
+    .banner .play-again{margin-top:1.5rem;padding:.75rem 2rem;font-size:1rem;background:linear-gradient(135deg,#4ade80,#22c55e);border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:bold;transition:transform .2s}
+    .banner .play-again:hover{transform:scale(1.05)}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;opacity:0;animation:fadeIn .3s ease forwards}
+    @keyframes fadeIn{to{opacity:1}}
     .reset-btn{margin-top:1rem;padding:.75rem 2rem;font-size:1rem;background:linear-gradient(135deg,#f7931a,#627eea);border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:bold;transition:transform .2s}
     .reset-btn:hover{transform:translateY(-2px)}
     #loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:100}
   </style>
-<script defer src="bundle.js"></script></head>
+<script defer src="bundle.0ef480f811b0d6e1eb43.js"></script></head>
 <body>
   <div id="loading">Loading ICP Agent...</div>
   <h1>BTC vs ETH</h1>
@@ -51,5 +67,11 @@
   </div>
   <p class="status" id="status">Click to play</p>
   <button class="reset-btn" id="reset">New Game</button>
+  <div class="overlay" id="overlay"></div>
+  <div class="banner" id="banner">
+    <h2 id="bannerTitle"></h2>
+    <p id="bannerSubtitle"></p>
+    <button class="play-again" id="playAgain">Play Again</button>
+  </div>
 </body>
 </html>
