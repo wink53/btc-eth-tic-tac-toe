@@ -199,10 +199,28 @@ async function makeMove(pos) {
 
   try {
     console.log('Making move:', pos);
-    lastMovedPos = pos; // Track this cell for animation
-    playPlaceSound(currentPlayer === 1); // Bitcoin plays first
-    await actor.makeMove(pos);
-    setTimeout(fetchState, 300);
+    lastMovedPos = pos;
+
+    // Optimistically update local board immediately (no waiting)
+    const movingPlayer = currentPlayer;
+    board[pos] = movingPlayer;
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+    // Play sound and animate right away - no delay
+    playPlaceSound(movingPlayer === 1);
+    render(); // Shows animation instantly
+
+    // Now send the actual move to the backend (fire and forget)
+    actor.makeMove(pos).then(() => {
+      // After backend confirms, re-fetch to ensure sync
+      setTimeout(fetchState, 100);
+    }).catch(err => {
+      console.error('Move failed:', err);
+      // Revert on error
+      board[pos] = 0;
+      currentPlayer = movingPlayer;
+      render();
+    });
   } catch (e) {
     console.error('Move error:', e);
   }
