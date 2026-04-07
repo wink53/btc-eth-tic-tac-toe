@@ -42,6 +42,8 @@ function hideBanner() {
   overlayEl.style.display = 'none';
   bannerEl.style.display = 'none';
   bannerEl.className = 'banner';
+  // Remove winning highlight from all cells
+  cells.forEach(cell => cell.classList.remove('winner'));
 }
 
 function showBanner(winner, pattern) {
@@ -147,6 +149,12 @@ async function resetGame() {
   try {
     console.log('Resetting game...');
     hideBanner();
+    // Immediately clear board visually before async call
+    cells.forEach(cell => {
+      cell.innerHTML = '';
+      cell.classList.remove('taken', 'winner');
+    });
+    statusEl.textContent = 'Resetting...';
     await actor.reset();
     board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     currentPlayer = 1;
