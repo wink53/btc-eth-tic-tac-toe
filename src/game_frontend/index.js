@@ -85,7 +85,6 @@ let currentPlayer = 1;
 let gameOver = false;
 let winner = 0;
 let lastMovedPos = -1; // Track which cell was just placed
-let hasPendingMove = false; // True when a move is in flight (don't let initial fetch overwrite)
 
 function hideBanner() {
   overlayEl.style.display = 'none';
@@ -171,9 +170,6 @@ async function render() {
 }
 
 async function fetchState() {
-  // Skip if a move is in flight - don't let stale backend state overwrite optimistic update
-  if (hasPendingMove) return;
-
   try {
     console.log('Fetching state...');
 
@@ -184,16 +180,20 @@ async function fetchState() {
       actor.getWinner(),
     ]);
 
-    board = boardResult.map(n => Number(n));
-    currentPlayer = Number(playerResult) || 1;
-    gameOver = Boolean(gameOverResult);
-    winner = Number(winnerResult) || 0;
-    console.log('Board:', board, 'Player:', currentPlayer, 'GameOver:', gameOver, 'Winner:', winner);
+    // Only update game-over state from backend; keep board/player from optimistic updates
+    const newGameOver = Boolean(gameOverResult);
+    const newWinner = Number(winnerResult) || 0;
 
-    render();
+    if (newGameOver !== gameOver || newWinner !== winner) {
+      gameOver = newGameOver;
+      winner = newWinner;
+      // Re-render to show game-end state (banner, winning highlights)
+      render();
+    }
+    console.log('GameOver:', gameOver, 'Winner:', winner);
+
   } catch (e) {
     console.error('State fetch error:', e);
-    render();
   }
   loadingEl.style.display = 'none';
 }
@@ -204,7 +204,6 @@ async function makeMove(pos) {
   try {
     console.log('Making move:', pos);
     lastMovedPos = pos;
-    hasPendingMove = true;
 
     // Optimistically update local board immediately (no waiting)
     const movingPlayer = currentPlayer;
@@ -217,10 +216,10 @@ async function makeMove(pos) {
 
     // Now send the actual move to the backend (fire and forget)
     actor.makeMove(pos).then(() => {
-      hasPendingMove = false;
+      // After backend confirms, fetch game-over state
+      setTimeout(fetchState, 200);
     }).catch(err => {
       console.error('Move failed:', err);
-      hasPendingMove = false;
       // Revert on error
       board[pos] = 0;
       currentPlayer = movingPlayer;
@@ -228,7 +227,6 @@ async function makeMove(pos) {
     });
   } catch (e) {
     console.error('Move error:', e);
-    hasPendingMove = false;
   }
 }
 
