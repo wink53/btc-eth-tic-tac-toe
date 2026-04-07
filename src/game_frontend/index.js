@@ -199,10 +199,13 @@ async function fetchState() {
 }
 
 async function makeMove(pos) {
-  if (gameOver || board[pos] !== 0) return;
+  if (gameOver || board[pos] !== 0) {
+    console.log('makeMove blocked:', { pos, gameOver, boardPos: board[pos] });
+    return;
+  }
 
   try {
-    console.log('Making move:', pos);
+    console.log('Making move:', { pos, movingPlayer: currentPlayer, board: [...board] });
     lastMovedPos = pos;
 
     // Optimistically update local board immediately (no waiting)
@@ -267,4 +270,12 @@ currentPlayer = 1;
 gameOver = false;
 winner = 0;
 loadingEl.style.display = 'block';
-actor.reset().then(() => fetchState()).catch(() => fetchState());
+
+// Await the reset promise so we don't race with fetchState
+actor.reset().then(() => {
+  console.log('Backend reset complete, fetching state...');
+  fetchState();
+}).catch(() => {
+  console.log('Backend reset failed, fetching state anyway...');
+  fetchState();
+});
