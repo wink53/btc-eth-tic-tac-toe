@@ -4,6 +4,53 @@ import { canisterId, createActor } from '@declarations/game_backend';
 
 const REPLICA_URL = 'http://127.0.0.1:4943';
 
+// --- Sound Effects using Web Audio API ---
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type = 'sine', volume = 0.3, delay = 0) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + delay + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+  osc.start(ctx.currentTime + delay);
+  osc.stop(ctx.currentTime + delay + duration);
+}
+
+function playPlaceSound(isBitcoin) {
+  // Bitcoin gets a deeper, warmer plop; Ethereum gets a crisper, higher chime
+  const baseFreq = isBitcoin ? 330 : 440;
+  playTone(baseFreq, 0.15, 'sine', 0.25);
+  playTone(baseFreq * 1.5, 0.1, 'triangle', 0.12, 0.05);
+  if (isBitcoin) {
+    playTone(baseFreq * 0.5, 0.12, 'sine', 0.1, 0.03);
+  }
+}
+
+function playWinSound() {
+  // Rising triumphant chord
+  const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+  notes.forEach((freq, i) => playTone(freq, 0.4, 'sine', 0.2, i * 0.12));
+  // Add a sparkle on top
+  playTone(2093, 0.3, 'triangle', 0.1, 0.5);
+}
+
+function playDrawSound() {
+  // Neutral descending tone
+  playTone(440, 0.2, 'sine', 0.2);
+  playTone(330, 0.3, 'sine', 0.15, 0.15);
+  playTone(220, 0.4, 'sine', 0.1, 0.3);
+}
+
 // Create agent and actor using generated declarations
 const agent = new HttpAgent({
   host: REPLICA_URL,
@@ -55,11 +102,13 @@ function showBanner(winner, pattern) {
     bannerEl.classList.add('draw');
     bannerTitle.textContent = "It's a Draw!";
     bannerSubtitle.textContent = 'Great game, both players!';
+    playDrawSound();
   } else {
     const player = PLAYERS[winner];
     bannerEl.classList.add(player.name.toLowerCase());
     bannerTitle.textContent = `${player.name} Wins!`;
     bannerSubtitle.textContent = 'Congratulations to the winner!';
+    playWinSound();
   }
 }
 
@@ -151,6 +200,7 @@ async function makeMove(pos) {
   try {
     console.log('Making move:', pos);
     lastMovedPos = pos; // Track this cell for animation
+    playPlaceSound(currentPlayer === 1); // Bitcoin plays first
     await actor.makeMove(pos);
     setTimeout(fetchState, 300);
   } catch (e) {
