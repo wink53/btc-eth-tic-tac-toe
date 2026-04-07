@@ -9,6 +9,19 @@
     body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
     h1{font-size:2.5rem;background:linear-gradient(90deg,#f7931a,#627eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .subtitle{margin-bottom:1.5rem;opacity:.8}
+    .top-bar{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
+    .mode-select{display:flex;gap:.5rem}
+    .mode-btn{padding:.4rem .8rem;font-size:.8rem;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;border-radius:6px;cursor:pointer;transition:all .2s}
+    .mode-btn:hover{border-color:rgba(255,255,255,.4)}
+    .mode-btn.active{background:rgba(74,222,128,.2);border-color:#4ade80;color:#4ade80}
+    .sound-btn{background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;padding:.4rem;opacity:.7;transition:opacity .2s}
+    .sound-btn:hover{opacity:1}
+    .sound-btn.muted{opacity:.3}
+    .scores{display:flex;gap:1.5rem;margin-bottom:1rem;font-size:.9rem;opacity:.8}
+    .scores span{margin-right:.5rem}
+    .scores .btc-score{color:#f7931a}
+    .scores .eth-score{color:#627eea}
+    .scores .draws-score{color:#fbbf24}
     .players{display:flex;gap:2rem;margin-bottom:1rem}
     .player{padding:.5rem 1rem;border-radius:8px;font-weight:bold;opacity:.5;transition:all .3s}
     .player.active{opacity:1;transform:scale(1.1);box-shadow:0 0 20px rgba(255,255,255,.2)}
@@ -21,6 +34,8 @@
     .cell:hover{background:rgba(255,255,255,.1);transform:scale(1.05)}
     .cell.taken{cursor:not-allowed}
     .cell.taken:hover{transform:none}
+    .cell.disabled{cursor:not-allowed;opacity:.7}
+    .cell.disabled:hover{transform:none}
     .cell svg{width:70px;height:70px;filter:drop-shadow(0 0 8px rgba(255,255,255,.3))}
     .cell.just-placed{animation:cellPop .4s ease-out}
     .cell.just-placed svg{animation:iconLand .6s cubic-bezier(.34,1.56,.64,1) forwards}
@@ -48,13 +63,26 @@
     @keyframes fadeIn{to{opacity:1}}
     .reset-btn{margin-top:1rem;padding:.75rem 2rem;font-size:1rem;background:linear-gradient(135deg,#f7931a,#627eea);border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:bold;transition:transform .2s}
     .reset-btn:hover{transform:translateY(-2px)}
-    #loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:100}
+    #loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:100}
   </style>
 </head>
 <body>
   <div id="loading">Loading ICP Agent...</div>
   <h1>BTC vs ETH</h1>
   <p class="subtitle">Tic Tac Toe on ICP</p>
+  <div class="top-bar">
+    <div class="mode-select">
+      <button class="mode-btn active" data-mode="pvp">PvP</button>
+      <button class="mode-btn" data-mode="btc_cpu">BTC vs CPU</button>
+      <button class="mode-btn" data-mode="cpu_eth">CPU vs ETH</button>
+    </div>
+    <button class="sound-btn" id="soundBtn" title="Toggle sound">🔊</button>
+  </div>
+  <div class="scores">
+    <span class="btc-score">BTC: <b id="btcScore">0</b></span>
+    <span class="eth-score">ETH: <b id="ethScore">0</b></span>
+    <span class="draws-score">Draws: <b id="drawScore">0</b></span>
+  </div>
   <div class="players">
     <div class="player bitcoin" id="pb"><span>Bitcoin</span></div>
     <div class="player ethereum" id="pe"><span>Ethereum</span></div>
