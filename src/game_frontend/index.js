@@ -261,6 +261,10 @@ playAgainBtn.addEventListener('click', () => {
   resetGame();
 });
 
-// Init
+// Init - reset local state and call backend reset to clear any old game
+board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+currentPlayer = 1;
+gameOver = false;
+winner = 0;
 loadingEl.style.display = 'block';
-fetchState();
+actor.reset().then(() => fetchState()).catch(() => fetchState());
