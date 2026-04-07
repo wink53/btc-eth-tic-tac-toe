@@ -35,8 +35,8 @@
     .status.win{color:#4ade80;font-weight:bold;animation:bounce 1s ease}
     .status.draw{color:#fbbf24;font-weight:bold}
     @keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}50%{transform:translateY(-5px)}}
-    .banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,rgba(0,0,0,.95),rgba(30,30,50,.95));border:3px solid #4ade80;border-radius:20px;padding:2rem 3rem;text-align:center;z-index:200;animation:popIn .5s ease forwards}
-    @keyframes popIn{0%{transform:translate(-50%,-50%) scale(0);opacity:0}70%{transform:translate(-50%,-50%) scale(1.1);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+    .banner{position:fixed;top:15%;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(0,0,0,.95),rgba(30,30,50,.95));border:3px solid #4ade80;border-radius:20px;padding:2rem 3rem;text-align:center;z-index:200;animation:popIn .5s ease forwards}
+    @keyframes popIn{0%{transform:translateX(-50%) scale(0);opacity:0}70%{transform:translateX(-50%) scale(1.1);opacity:1}100%{transform:translateX(-50%) scale(1);opacity:1}}
     .banner h2{font-size:2rem;margin-bottom:.5rem}
     .banner.bitcoin h2{color:#f7931a}
     .banner.ethereum h2{color:#627eea}
@@ -50,7 +50,7 @@
     .reset-btn:hover{transform:translateY(-2px)}
     #loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:100}
   </style>
-<script defer src="bundle.8eaa1602993fa25e7185.js"></script></head>
+<script defer src="bundle.91c5d699958e7b987d24.js"></script></head>
 <body>
   <div id="loading">Loading ICP Agent...</div>
   <h1>BTC vs ETH</h1>

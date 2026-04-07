@@ -37,6 +37,7 @@ let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 let currentPlayer = 1;
 let gameOver = false;
 let winner = 0;
+let lastMovedPos = -1; // Track which cell was just placed
 
 function hideBanner() {
   overlayEl.style.display = 'none';
@@ -67,25 +68,29 @@ async function render() {
   peEl.classList.toggle('active', currentPlayer === 2 && !gameOver);
 
   cells.forEach((cell, i) => {
+    const isJustPlaced = i === lastMovedPos;
     if (board[i] !== 0 && PLAYERS[board[i]]) {
       cell.innerHTML = ''; // clear
       cell.classList.add('taken');
       const playerClass = board[i] === 1 ? 'bitcoin' : 'ethereum';
       cell.classList.add(playerClass);
-      // Use setTimeout to defer SVG insertion, forcing fresh animation
-      setTimeout(() => {
-        cell.innerHTML = PLAYERS[board[i]].svg;
-        cell.classList.add('just-placed');
-        // Remove animation class after it completes
+      // Only animate the cell that was just placed, not all existing tokens
+      if (isJustPlaced) {
         setTimeout(() => {
-          cell.classList.remove('just-placed');
-        }, 400);
-      }, 0);
+          cell.innerHTML = PLAYERS[board[i]].svg;
+          cell.classList.add('just-placed');
+          setTimeout(() => cell.classList.remove('just-placed'), 400);
+        }, 0);
+      } else {
+        cell.innerHTML = PLAYERS[board[i]].svg;
+      }
     } else {
       cell.innerHTML = '';
       cell.classList.remove('taken', 'bitcoin', 'ethereum', 'just-placed');
     }
   });
+
+  lastMovedPos = -1; // Reset after rendering
 
   if (gameOver) {
     if (winner === 3) {
@@ -145,6 +150,7 @@ async function makeMove(pos) {
 
   try {
     console.log('Making move:', pos);
+    lastMovedPos = pos; // Track this cell for animation
     await actor.makeMove(pos);
     setTimeout(fetchState, 300);
   } catch (e) {
