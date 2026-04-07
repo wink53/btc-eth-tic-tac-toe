@@ -70,13 +70,20 @@ async function render() {
     if (board[i] !== 0 && PLAYERS[board[i]]) {
       cell.innerHTML = ''; // clear
       cell.classList.add('taken');
+      const playerClass = board[i] === 1 ? 'bitcoin' : 'ethereum';
+      cell.classList.add(playerClass);
       // Use setTimeout to defer SVG insertion, forcing fresh animation
       setTimeout(() => {
         cell.innerHTML = PLAYERS[board[i]].svg;
+        cell.classList.add('just-placed');
+        // Remove animation class after it completes
+        setTimeout(() => {
+          cell.classList.remove('just-placed');
+        }, 400);
       }, 0);
     } else {
       cell.innerHTML = '';
-      cell.classList.remove('taken');
+      cell.classList.remove('taken', 'bitcoin', 'ethereum', 'just-placed');
     }
   });
 
@@ -152,7 +159,7 @@ async function resetGame() {
     // Immediately clear board visually before async call
     cells.forEach(cell => {
       cell.innerHTML = '';
-      cell.classList.remove('taken', 'winner');
+      cell.classList.remove('taken', 'winner', 'bitcoin', 'ethereum', 'just-placed');
     });
     statusEl.textContent = 'Resetting...';
     await actor.reset();
