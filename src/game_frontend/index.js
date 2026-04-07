@@ -85,6 +85,7 @@ let currentPlayer = 1;
 let gameOver = false;
 let winner = 0;
 let lastMovedPos = -1; // Track which cell was just placed
+let hasPendingMove = false; // True when a move is in flight (don't let initial fetch overwrite)
 
 function hideBanner() {
   overlayEl.style.display = 'none';
@@ -170,6 +171,9 @@ async function render() {
 }
 
 async function fetchState() {
+  // Skip if a move is in flight - don't let stale backend state overwrite optimistic update
+  if (hasPendingMove) return;
+
   try {
     console.log('Fetching state...');
 
@@ -200,6 +204,7 @@ async function makeMove(pos) {
   try {
     console.log('Making move:', pos);
     lastMovedPos = pos;
+    hasPendingMove = true;
 
     // Optimistically update local board immediately (no waiting)
     const movingPlayer = currentPlayer;
@@ -212,10 +217,10 @@ async function makeMove(pos) {
 
     // Now send the actual move to the backend (fire and forget)
     actor.makeMove(pos).then(() => {
-      // After backend confirms, re-fetch to ensure sync
-      setTimeout(fetchState, 100);
+      hasPendingMove = false;
     }).catch(err => {
       console.error('Move failed:', err);
+      hasPendingMove = false;
       // Revert on error
       board[pos] = 0;
       currentPlayer = movingPlayer;
@@ -223,6 +228,7 @@ async function makeMove(pos) {
     });
   } catch (e) {
     console.error('Move error:', e);
+    hasPendingMove = false;
   }
 }
 
