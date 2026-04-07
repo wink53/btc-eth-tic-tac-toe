@@ -126,11 +126,10 @@ async function render() {
       cell.classList.add(playerClass);
       // Only animate the cell that was just placed, not all existing tokens
       if (isJustPlaced) {
-        setTimeout(() => {
-          cell.innerHTML = PLAYERS[board[i]].svg;
-          cell.classList.add('just-placed');
-          setTimeout(() => cell.classList.remove('just-placed'), 1200);
-        }, 0);
+        // Set innerHTML immediately so token is always present; animate the class
+        cell.innerHTML = PLAYERS[board[i]].svg;
+        cell.classList.add('just-placed');
+        setTimeout(() => cell.classList.remove('just-placed'), 1200);
       } else {
         cell.innerHTML = PLAYERS[board[i]].svg;
       }
