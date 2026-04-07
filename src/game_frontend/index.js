@@ -129,7 +129,7 @@ async function render() {
         setTimeout(() => {
           cell.innerHTML = PLAYERS[board[i]].svg;
           cell.classList.add('just-placed');
-          setTimeout(() => cell.classList.remove('just-placed'), 600);
+          setTimeout(() => cell.classList.remove('just-placed'), 1200);
         }, 0);
       } else {
         cell.innerHTML = PLAYERS[board[i]].svg;
@@ -221,8 +221,8 @@ async function makeMove(pos) {
     // Now send the actual move to the backend
     actor.makeMove(pos).then(() => {
       hasPendingMove = false;
-      // Fetch game-over state after backend confirms
-      setTimeout(fetchState, 200);
+      // Wait for animation to finish (1200ms) before syncing with backend
+      setTimeout(fetchState, 1400);
     }).catch(err => {
       console.error('Move failed:', err);
       hasPendingMove = false;
