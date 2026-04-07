@@ -85,6 +85,7 @@ let currentPlayer = 1;
 let gameOver = false;
 let winner = 0;
 let lastMovedPos = -1; // Track which cell was just placed
+let isSyncing = false; // Lock to prevent rapid clicks during backend sync
 
 function hideBanner() {
   overlayEl.style.display = 'none';
@@ -128,7 +129,7 @@ async function render() {
         setTimeout(() => {
           cell.innerHTML = PLAYERS[board[i]].svg;
           cell.classList.add('just-placed');
-          setTimeout(() => cell.classList.remove('just-placed'), 400);
+          setTimeout(() => cell.classList.remove('just-placed'), 600);
         }, 0);
       } else {
         cell.innerHTML = PLAYERS[board[i]].svg;
@@ -195,11 +196,12 @@ async function fetchState() {
 }
 
 async function makeMove(pos) {
-  if (gameOver || board[pos] !== 0) return;
+  if (gameOver || board[pos] !== 0 || isSyncing) return;
 
   try {
     console.log('Making move:', pos);
     lastMovedPos = pos;
+    isSyncing = true;
 
     // Optimistically update local board immediately (no waiting)
     const movingPlayer = currentPlayer;
@@ -212,10 +214,12 @@ async function makeMove(pos) {
 
     // Now send the actual move to the backend (fire and forget)
     actor.makeMove(pos).then(() => {
+      isSyncing = false;
       // After backend confirms, re-fetch to ensure sync
       setTimeout(fetchState, 100);
     }).catch(err => {
       console.error('Move failed:', err);
+      isSyncing = false;
       // Revert on error
       board[pos] = 0;
       currentPlayer = movingPlayer;
@@ -223,6 +227,7 @@ async function makeMove(pos) {
     });
   } catch (e) {
     console.error('Move error:', e);
+    isSyncing = false;
   }
 }
 

@@ -22,12 +22,12 @@
     .cell.taken{cursor:not-allowed}
     .cell.taken:hover{transform:none}
     .cell svg{width:70px;height:70px;filter:drop-shadow(0 0 8px rgba(255,255,255,.3))}
-    .cell.just-placed{animation:cellPop .3s ease-out}
-    .cell.just-placed svg{animation:iconLand .4s cubic-bezier(.34,1.56,.64,1) forwards}
+    .cell.just-placed{animation:cellPop .4s ease-out}
+    .cell.just-placed svg{animation:iconLand .6s cubic-bezier(.34,1.56,.64,1) forwards}
     @keyframes cellPop{0%{transform:scale(.85)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
     @keyframes iconLand{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
-    .cell.bitcoin.just-placed{box-shadow:0 0 20px 5px rgba(247,147,26,.6)}
-    .cell.ethereum.just-placed{box-shadow:0 0 20px 5px rgba(98,126,234,.6)}
+    .cell.bitcoin.just-placed{box-shadow:0 0 25px 8px rgba(247,147,26,.7)}
+    .cell.ethereum.just-placed{box-shadow:0 0 25px 8px rgba(98,126,234,.7)}
     .cell.winner{animation:pulse 1s infinite}
     @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.7)}50%{box-shadow:0 0 20px 10px rgba(74,222,128,.3)}}
     .cell.winner::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,222,128,.3),transparent);border-radius:6px}
@@ -50,7 +50,7 @@
     .reset-btn:hover{transform:translateY(-2px)}
     #loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:100}
   </style>
-<script defer src="bundle.777d010e0c0a416b59b0.js"></script></head>
+<script defer src="bundle.183105748517dc4e1861.js"></script></head>
 <body>
   <div id="loading">Loading ICP Agent...</div>
   <h1>BTC vs ETH</h1>
