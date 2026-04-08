@@ -154,7 +154,7 @@ function cpuPlayerForMode(mode) {
 
 function isCpuTurn() {
   const cpu = cpuPlayerForMode(gameMode);
-  return cpu !== null && currentPlayer === cpu && !gameOver;
+  return cpu !== null && currentPlayer === cpu && !gameOver && pendingPos < 0;
 }
 
 // --- DOM elements ---
@@ -181,7 +181,7 @@ let currentPlayer = 1;
 let gameOver = false;
 let winner = 0;
 let lastMovedPos = -1;
-let hasPendingMove = false;
+let pendingPos = -1; // Tracks the last move awaiting backend confirmation
 let cpuTimeoutId = null;
 let scoresUpdated = false; // Track if scores were already updated for this game
 
@@ -311,8 +311,6 @@ async function render() {
 }
 
 async function fetchState() {
-  if (hasPendingMove) return;
-
   try {
     console.log('Fetching state...');
     const [boardResult, playerResult, gameOverResult, winnerResult] = await Promise.all([
@@ -322,7 +320,16 @@ async function fetchState() {
       actor.getWinner(),
     ]);
 
-    board = boardResult.map(n => Number(n));
+    const newBoard = boardResult.map(n => Number(n));
+    // Only trust the board if pendingPos is cleared (backend has committed)
+    // or if the board actually shows the pending move
+    if (pendingPos < 0 || newBoard[pendingPos] !== 0) {
+      board = newBoard;
+      // Clear pending if backend has the move committed
+      if (pendingPos >= 0 && board[pendingPos] !== 0) {
+        pendingPos = -1;
+      }
+    }
     currentPlayer = Number(playerResult) || 1;
     gameOver = Boolean(gameOverResult);
     winner = Number(winnerResult) || 0;
@@ -336,32 +343,33 @@ async function fetchState() {
   loadingEl.style.display = 'none';
 }
 
-async function makeMove(pos) {
+async function makeMove(pos, isCpu = false) {
   if (gameOver || board[pos] !== 0) {
     console.log('makeMove blocked:', { pos, gameOver, boardPos: board[pos] });
     return;
   }
 
-  // Block human moves during CPU turn
-  if (isCpuTurn()) return;
+  // Block human moves during CPU turn (but not the CPU's own moves)
+  if (!isCpu && isCpuTurn()) return;
 
   try {
     console.log('Making move:', { pos, movingPlayer: currentPlayer, board: [...board] });
     lastMovedPos = pos;
+    pendingPos = pos; // Mark this cell as pending backend confirmation
 
     const movingPlayer = currentPlayer;
     board[pos] = movingPlayer;
-    currentPlayer = currentPlayer === 1 ? 2 : 1;
+    currentPlayer = movingPlayer === 1 ? 2 : 1;
 
     playPlaceSound(movingPlayer === 1);
     render();
 
     actor.makeMove(pos).then(() => {
-      hasPendingMove = false;
-      setTimeout(fetchState, 1400);
+      pendingPos = -1; // Backend has confirmed — safe to clear now
+      fetchState(); // Sync immediately instead of waiting
     }).catch(err => {
       console.error('Move failed:', err);
-      hasPendingMove = false;
+      pendingPos = -1;
       board[pos] = 0;
       currentPlayer = movingPlayer;
       render();
@@ -378,7 +386,7 @@ function triggerCpuMove() {
   const move = getBestMove([...board], cpu);
   if (move >= 0) {
     console.log('CPU making move:', move);
-    makeMove(move);
+    makeMove(move, true);
   }
 }
 
