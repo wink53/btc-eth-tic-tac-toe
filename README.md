@@ -69,6 +69,54 @@ reset: () -> ();
 - **Two-canister** — backend + frontend separation
 - **Webpack** — bundling for frontend canister
 
+## Mainnet Deployment
+
+### Identity & Wallet Setup
+
+Mainnet deploys require a dedicated identity and a cycles wallet funded with ICP.
+
+```bash
+# 1. Create a production identity
+dfx identity new prod
+dfx identity use prod
+
+# 2. Get the account ID to fund with ICP
+dfx ledger account-id
+
+# 3. Convert ICP to cycles via the cycles ledger
+dfx ledger create-canister $(dfx identity get-principal) --amount <ICP_AMOUNT> --network ic
+
+# 4. Deploy a cycles wallet to the newly created canister
+dfx identity --network ic deploy-wallet <NEW_CANISTER_ID>
+
+# 5. Deploy to mainnet
+dfx deploy --network ic
+```
+
+### Controller Management
+
+The deployed canisters are controlled by the identity used for deployment. To check or update controllers:
+
+```bash
+# View canister controllers
+dfx canister --network ic status game_backend
+dfx canister --network ic status game_frontend
+
+# Remove a controller
+dfx canister --network ic update-settings game_backend --remove-controller <CONTROLLER_ID>
+```
+
+### Cycles Top-Up
+
+When cycles run low, send ICP to your identity's account and convert:
+
+```bash
+dfx ledger create-canister $(dfx identity get-principal) --amount <ICP_AMOUNT> --network ic
+dfx identity --network ic deploy-wallet <WALLET_CANISTER_ID>
+```
+
+Or use the NNS dapp, Plug wallet, or any cycles transfer tool.
+
 ## License
 
 MIT
