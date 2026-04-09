@@ -21,6 +21,8 @@ dfx deploy
 Then open the URL shown in the output (e.g. `http://localhost:4943/?canisterId=...`).
 
 ### Option 3 — Mainnet
+**Live:** https://pdkba-aqaaa-aaaal-qwwfq-cai.icp0.io/
+
 ```bash
 # Requires a cycles wallet on mainnet
 dfx deploy --network ic --wallet <your-wallet-canister-id>
