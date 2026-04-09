@@ -2,7 +2,9 @@
 import { HttpAgent } from '@dfinity/agent';
 import { canisterId, createActor } from '@declarations/game_backend';
 
-const REPLICA_URL = 'http://127.0.0.1:4943';
+const REPLICA_URL = process.env.DFX_NETWORK === 'ic'
+  ? 'https://icp0.io'
+  : 'http://127.0.0.1:4943';
 
 // --- Sound Effects using Web Audio API ---
 let audioCtx = null;

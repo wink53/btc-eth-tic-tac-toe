@@ -25,8 +25,8 @@ module.exports = {
       filename: 'index.html',
     }),
     new webpack.DefinePlugin({
-      'process.env.CANISTER_ID_GAME_BACKEND': JSON.stringify('bkyz2-fmaaa-aaaaa-qaaaq-cai'),
-      'process.env.DFX_NETWORK': JSON.stringify('local'),
+      'process.env.CANISTER_ID_GAME_BACKEND': JSON.stringify(process.env.CANISTER_ID_GAME_BACKEND || 'bkyz2-fmaaa-aaaaa-qaaaq-cai'),
+      'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK || 'local'),
     }),
   ],
 };
